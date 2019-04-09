@@ -30,21 +30,22 @@ I believe the code should be portable enough, but this is the "Minimum Viable Pr
 ## Usage
 
 This `irb` session should explain how to use it:
-
 ```
 require './seams'
-Seams # sanity check
-# create a set of MySQL options, plus a debug flag
-options = {debug: true, username: "your_user", database: "your_database"}
-seams = Seams.new(options)
-seams.methods.sort - Object.methods # just to show what's available
-seams.show_tables # prints entire schema
-initial_set = Set.new # null set
-seams.gather(initial_set) # another sanity check; should return null set
-# goal: we want to break out the code backed by `initial_set`
-initial_set.add("users") # this is the real use case
-initial_set.add("posts") # let's add one more
+# pass a set of MySQL options
+seams = Seams.new(database: "yourdb", username: "youruser")
+initial_set = Set.new(["users", "products"])
 seams.gather(initial_set) # prints set of tables that belong inside seam
 ```
 
-
+Further explorations:
+```
+# debug output shows algorithm in action
+seams = Seams.new(database: "yourdb", username: "youruser", debug: true)
+# show available public methods
+seams.methods.sort - Object.methods
+# print entire schema
+seams.show_tables
+seams.gather(Set.new) # should return null set
+seams.gather(seams.show_tables) # should return entire schema
+```
