@@ -9,12 +9,14 @@ class Seams
   FOREIGN_KEYS_STATEMENT = <<~SQL
     SELECT referenced_table_name
     FROM information_schema.key_column_usage
-    WHERE TABLE_NAME = ?
+    WHERE table_schema = ?
+      AND table_name = ?
       AND referenced_table_name IS NOT NULL
   SQL
 
   def initialize(options)
     @client = Mysql2::Client.new(options) # overrides any my.cnf
+    @database = @client.query_options[:database]
     @debug = options.has_key?(:debug)
   end
 
@@ -25,7 +27,7 @@ class Seams
 
   def find_foreign_key_constraint_references(table_name)
     statement = @client.prepare(FOREIGN_KEYS_STATEMENT)
-    result = statement.execute(table_name)
+    result = statement.execute(@database, table_name)
     result.map {|e| e.values}.flatten.to_set
   end
 
@@ -44,7 +46,7 @@ class Seams
       min_set << table_name
       unseen_tables = (references - min_set)
       unseen_tables.each do |unseen_table|
-        puts "Enqueue: #{unseen_table}" if @debug
+        puts "Enqueue: #{table_name} -> #{unseen_table}" if @debug
         queue << unseen_table
       end
     end
