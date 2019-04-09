@@ -39,7 +39,7 @@ class Seams
     end
     while (queue.length > 0)
       table_name = queue.deq
-      puts "Dequeue: #{table_name}"
+      puts "Dequeue: #{table_name}" if @debug
       references = find_foreign_key_constraint_references(table_name)
       min_set << table_name
       unseen_tables = (references - min_set)
