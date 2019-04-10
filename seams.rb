@@ -39,11 +39,12 @@ class Seams
     result.map {|e| e.values}.flatten.to_set
   end
 
-  def gather(initial_set)
+  # finds the minimum set that includes the initial set
+  def find(initial_set)
     initial_set = initial_set.to_set # convert Array if need be
-    min_set = Set.new
+    min_set = SortedSet.new
     queue = Queue.new
-    queue_set = Set.new
+    queue_set = SortedSet.new
     initial_set.each do |table_name|
       puts "Add to initial_set: #{table_name}" if @debug
       queue << table_name
@@ -68,5 +69,25 @@ class Seams
       end
     end
     min_set
+  end
+
+  # hacky way to pick a random element from a set
+  def pick_set_element(set)
+    set.each {|element| return element}
+  end
+
+  # finds all the seams in the schema
+  def solve
+    solution = Set.new # set of sets
+    all_tables = show_tables
+
+    while !all_tables.empty?
+      table = pick_set_element(all_tables)
+      min_set = find([table].to_set)
+      puts "Found min_set: #{min_set}" if @debug
+      solution << min_set
+      all_tables -= min_set
+    end
+    solution
   end
 end

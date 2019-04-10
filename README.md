@@ -35,7 +35,8 @@ require './seams'
 # pass a set of MySQL options
 seams = Seams.new(database: "yourdb", username: "youruser")
 initial_set = Set.new(["users", "products"])
-seams.gather(initial_set) # prints set of tables that belong inside seam
+seams.find(initial_set)
+seams.solve # returns set of sets that are separated by seams
 ```
 
 Further explorations:
@@ -46,6 +47,6 @@ seams = Seams.new(database: "yourdb", username: "youruser", debug: true)
 seams.methods.sort - Object.methods
 # print entire schema
 seams.show_tables
-seams.gather(Set.new) # should return null set
-seams.gather(seams.show_tables) # should return entire schema
+seams.find(Set.new) # should return null set
+seams.find(seams.show_tables) # should return entire schema
 ```
