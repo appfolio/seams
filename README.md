@@ -36,6 +36,7 @@ require './seams'
 seams = Seams.new(database: "yourdb", username: "youruser")
 initial_set = Set.new(["users", "products"])
 seams.find(initial_set)
+seams.solve # returns set of sets that are separated by seams
 ```
 
 Further explorations:

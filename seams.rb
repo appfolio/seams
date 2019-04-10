@@ -70,4 +70,24 @@ class Seams
     end
     min_set
   end
+
+  # hacky way to pick a random element from a set
+  def pick_set_element(set)
+    set.each {|element| return element}
+  end
+
+  # finds all the seams in the schema
+  def solve
+    solution = Set.new # set of sets
+    all_tables = show_tables
+
+    while !all_tables.empty?
+      table = pick_set_element(all_tables)
+      min_set = find([table].to_set)
+      puts "Found min_set: #{min_set}" if @debug
+      solution << min_set
+      all_tables -= min_set
+    end
+    solution
+  end
 end
