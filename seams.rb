@@ -39,11 +39,12 @@ class Seams
     result.map {|e| e.values}.flatten.to_set
   end
 
-  def gather(initial_set)
+  # finds the minimum set that includes the initial set
+  def find(initial_set)
     initial_set = initial_set.to_set # convert Array if need be
-    min_set = Set.new
+    min_set = SortedSet.new
     queue = Queue.new
-    queue_set = Set.new
+    queue_set = SortedSet.new
     initial_set.each do |table_name|
       puts "Add to initial_set: #{table_name}" if @debug
       queue << table_name
