@@ -2,8 +2,11 @@ require 'set'
 require 'mysql2'
 
 class Seams
-  SHOW_TABLES_STATEMENT = <<~SQL
-    SHOW TABLES
+  LIST_TABLES_STATEMENT = <<~SQL
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE'
+    AND table_schema = ?;
   SQL
 
   REFERENCED_TABLES_STATEMENT = <<~SQL
@@ -23,13 +26,14 @@ class Seams
   SQL
 
   def initialize(options)
+    @debug = options.delete(:debug)
     @client = Mysql2::Client.new(options) # overrides any my.cnf
     @database = @client.query_options[:database]
-    @debug = options.has_key?(:debug)
   end
 
-  def show_tables
-    result = @client.query(SHOW_TABLES_STATEMENT)
+  def list_tables
+    statement = @client.prepare(LIST_TABLES_STATEMENT)
+    result = statement.execute(@database)
     result.map {|e| e.values}.flatten.to_set
   end
 
@@ -79,7 +83,7 @@ class Seams
   # finds all the seams in the schema
   def solve
     solution = Set.new # set of sets
-    all_tables = show_tables
+    all_tables = list_tables
 
     while !all_tables.empty?
       table = pick_set_element(all_tables)
