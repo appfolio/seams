@@ -61,12 +61,12 @@ class Seams
       min_set << table_name
 
       referenced_tables = find_foreign_key_constraint_references(table_name, REFERENCED_TABLES_STATEMENT)
-      puts "Referenced tables: #{referenced_tables}" if @debug
+      puts "Referenced tables: #{referenced_tables.inspect}" if @debug
       referencing_tables = find_foreign_key_constraint_references(table_name, REFERENCING_TABLES_STATEMENT)
-      puts "Referencing tables: #{referencing_tables}" if @debug
+      puts "Referencing tables: #{referencing_tables.inspect}" if @debug
 
       unseen_tables = (referenced_tables + referencing_tables - min_set - queue_set)
-      puts "Unseen tables: #{unseen_tables}" if @debug
+      puts "Unseen tables: #{unseen_tables.inspect}" if @debug
       unseen_tables.each do |unseen_table|
         queue << unseen_table
         queue_set << unseen_table
@@ -88,7 +88,7 @@ class Seams
     while !all_tables.empty?
       table = pick_set_element(all_tables)
       min_set = find([table].to_set)
-      puts "Found min_set: #{min_set}" if @debug
+      puts "Found min_set: #{min_set.inspect}" if @debug
       solution << min_set
       all_tables -= min_set
     end
