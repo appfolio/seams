@@ -2,8 +2,11 @@ require 'set'
 require 'mysql2'
 
 class Seams
-  SHOW_TABLES_STATEMENT = <<~SQL
-    SHOW TABLES
+  LIST_TABLES_STATEMENT = <<~SQL
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE'
+    AND table_schema = ?;
   SQL
 
   REFERENCED_TABLES_STATEMENT = <<~SQL
@@ -23,13 +26,14 @@ class Seams
   SQL
 
   def initialize(options)
+    @debug = options.delete(:debug)
     @client = Mysql2::Client.new(options) # overrides any my.cnf
     @database = @client.query_options[:database]
-    @debug = options.has_key?(:debug)
   end
 
-  def show_tables
-    result = @client.query(SHOW_TABLES_STATEMENT)
+  def list_tables
+    statement = @client.prepare(LIST_TABLES_STATEMENT)
+    result = statement.execute(@database)
     result.map {|e| e.values}.flatten.to_set
   end
 
@@ -57,12 +61,12 @@ class Seams
       min_set << table_name
 
       referenced_tables = find_foreign_key_constraint_references(table_name, REFERENCED_TABLES_STATEMENT)
-      puts "Referenced tables: #{referenced_tables}" if @debug
+      puts "Referenced tables: #{referenced_tables.inspect}" if @debug
       referencing_tables = find_foreign_key_constraint_references(table_name, REFERENCING_TABLES_STATEMENT)
-      puts "Referencing tables: #{referencing_tables}" if @debug
+      puts "Referencing tables: #{referencing_tables.inspect}" if @debug
 
       unseen_tables = (referenced_tables + referencing_tables - min_set - queue_set)
-      puts "Unseen tables: #{unseen_tables}" if @debug
+      puts "Unseen tables: #{unseen_tables.inspect}" if @debug
       unseen_tables.each do |unseen_table|
         queue << unseen_table
         queue_set << unseen_table
@@ -79,12 +83,12 @@ class Seams
   # finds all the seams in the schema
   def solve
     solution = Set.new # set of sets
-    all_tables = show_tables
+    all_tables = list_tables
 
     while !all_tables.empty?
       table = pick_set_element(all_tables)
       min_set = find([table].to_set)
-      puts "Found min_set: #{min_set}" if @debug
+      puts "Found min_set: #{min_set.inspect}" if @debug
       solution << min_set
       all_tables -= min_set
     end

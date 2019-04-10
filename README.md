@@ -26,6 +26,8 @@ This tool allows you to explore your database schema and `find` one seam, or `so
 
 It doesn't matter which language your application is written in.
 However, it *does* matter which database you are using.
+Seams uses the ANSI SQL [information schema](https://en.wikipedia.org/wiki/Information_schema).
+
 The current implementation is using the `mysql2` gem and has been verified for MySQL Server 5.6 and 5.7.
 I believe the code should be portable enough, but this is the "Minimum Viable Product": just one file of Ruby code.
 
@@ -45,10 +47,8 @@ Further explorations:
 ```
 # debug output shows algorithm in action
 seams = Seams.new(database: "yourdb", username: "youruser", debug: true)
-# show available public methods
-seams.methods.sort - Object.methods
-# print entire schema
-seams.show_tables
+seams.methods.sort - Object.methods # show available public methods
 seams.find(Set.new) # should return null set
-seams.find(seams.show_tables) # should return entire schema
+all_tables = seams.list_tables # print entire schema
+seams.find(all_tables) # should return entire schema
 ```
