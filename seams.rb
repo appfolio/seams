@@ -2,14 +2,14 @@ require 'set'
 require 'mysql2'
 
 class Seams
-  LIST_TABLES_STATEMENT = <<~SQL
+  LIST_TABLES_STATEMENT = <<-SQL
     SELECT table_name
     FROM information_schema.tables
     WHERE table_type = 'BASE TABLE'
     AND table_schema = ?;
   SQL
 
-  REFERENCED_TABLES_STATEMENT = <<~SQL
+  REFERENCED_TABLES_STATEMENT = <<-SQL
     SELECT referenced_table_name
     FROM information_schema.key_column_usage
     WHERE table_schema = ?
@@ -17,7 +17,7 @@ class Seams
       AND referenced_table_name IS NOT NULL
   SQL
 
-  REFERENCING_TABLES_STATEMENT = <<~SQL
+  REFERENCING_TABLES_STATEMENT = <<-SQL
     SELECT table_name
     FROM information_schema.key_column_usage
     WHERE table_schema = ?
